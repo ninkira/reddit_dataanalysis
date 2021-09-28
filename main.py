@@ -3,7 +3,7 @@ import torch
 from transformers import pipeline
 
 from Pipeline.QuestionAnswering import TransformerTest
-from Data.DataCrawling import DataCrawler
+from DataScripts.DataCrawling import DataCrawler
 
 if __name__ == '__main__':
 
