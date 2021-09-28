@@ -8,7 +8,7 @@ from Data.Crawling.DataCrawling_Reddit import RedditCrawler
 
 class CrawlingPushshift:
     """
-    Diese Klasse beinhaltet den Crawler von Pushshift, um hiermit große Datenmengen an Postings direkt von Pushshift
+    Diese Klasse beinhaltet den Crawler von CrawlDirectory, um hiermit große Datenmengen an Postings direkt von CrawlDirectory
     herunterzuladen. Er basiert im wesentlichen auf den den Reddit-API Crawler. Auch hier sind noch Print Statements
     im Code um den zustand des Crawlers zu überprüfen. Skript ist außerdem angelehnt an.
     Author- und Kommentar-Daten werden hier bewusst aus Speicherplatz Gründen ausgelassen.
@@ -22,22 +22,22 @@ class CrawlingPushshift:
 
     def crawl_data(self):
         """
-        Hauptmethode um Daten von Pushshift zu crawlen.
+        Hauptmethode um Daten von CrawlDirectory zu crawlen.
         Quelle für die Request-URLs: https://medium.com/swlh/how-to-scrape-large-amounts-of-reddit-data-using-pushshift-1d33bde9286
         """
 
         aita_pushshift_df = pd.DataFrame()
-        print("Pushshift Crawler starts, after_obj:", self.after_object)
+        print("CrawlDirectory Crawler starts, after_obj:", self.after_object)
         crawl_iteration = 0
 
-        # auch hier: Aufrufen der Pushshift API mittels While-Loop.
+        # auch hier: Aufrufen der CrawlDirectory API mittels While-Loop.
         while True:
             time.sleep(1)
             crawl_iteration += 1
             print("crawl_iteration", crawl_iteration)
             print("after_obj", self.after_object)
-            if crawl_iteration >= 700:  # Pushshift hat keine Limits hinsichtlich Downloads, daher hier wesentlich höher.
-                print("Pushshift Crawling finished.")
+            if crawl_iteration >= 700:  # CrawlDirectory hat keine Limits hinsichtlich Downloads, daher hier wesentlich höher.
+                print("CrawlDirectory Crawling finished.")
                 break
             else:
                 if self.after_push_object == '':
@@ -47,7 +47,7 @@ class CrawlingPushshift:
                     result = aita_pushshift_df.to_json(orient="records")
                     parsed = json.loads(result)
                     filename = "PushshiftCrawling_" + str(crawl_iteration) + ".json"
-                    RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/Pushshift", filename)
+                    RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/CrawlDirectory", filename)
                     print("Saved ", len(aita_pushshift_df), " items into file", filename)
                 else:
                     print("Add aditional data, after_object:", self.after_object)
@@ -58,18 +58,18 @@ class CrawlingPushshift:
                     result = aita_pushshift_df.to_json(orient="records")
                     parsed = json.loads(result)
                     filename = "PushshiftCrawling_" + str(crawl_iteration) + ".json"
-                    RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/Pushshift", filename)
+                    RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/CrawlDirectory", filename)
                     print("Saved ", len(aita_pushshift_df), " items into file", filename)
                 # Konvertiere Dataframe zu JSON zum speichern in Datei, vgl. https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_json.html
         result = aita_pushshift_df.to_json(orient="records")
         parsed = json.loads(result)
-        RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/Pushshift", "PushshiftCrawling_699.json")
+        RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/CrawlDirectory", "PushshiftCrawling_699.json")
 
     def fill_metadata(self, headers):
         """
         Diese Methode fügt zusätzliche Metadaten zu den zuvor gecrawlten Posts hinzu. Hier ist das das
-        Moderations-Tag link_flair_text, was nicht über Pushshift verfügbar ist. Die Methode iteriert
-        über das Pushshift - Basisdatenset und fügt die Moderations-Tags zu jedem Post hinzu.
+        Moderations-Tag link_flair_text, was nicht über CrawlDirectory verfügbar ist. Die Methode iteriert
+        über das CrawlDirectory - Basisdatenset und fügt die Moderations-Tags zu jedem Post hinzu.
 
         :param headers: Request Header,
         generiert aus Authenfizierungsmethode.
@@ -134,7 +134,7 @@ class CrawlingPushshift:
         """
         Führt Request an Pushift API aus und sortiert die Daten aus der Request Response. Die Methode wandelt die
         Response in JSON um und sortiert die Daten mithilfe eines Pandas Dataframes. :param request_url: Request URL,
-        anhand denen die Daten von Pushshift heruntergeladen werden sollen. :return: Pandas Dataframe mit den
+        anhand denen die Daten von CrawlDirectory heruntergeladen werden sollen. :return: Pandas Dataframe mit den
         sortierten Daten.
         """
         dataframe = pd.DataFrame()
