@@ -6,6 +6,7 @@ import torch
 from DataScripts.DataCrawling import DataCrawler
 from DataScripts.CrawlingScripts.DataCrawling_Reddit import RedditCrawler
 from DataScripts.AnalysisScripts.CommentAnalysis import CommunityRating
+from DataScripts.AnalysisScripts.VerdictAnalysis import RatingAnalysis
 
 if __name__ == '__main__':
 
@@ -20,6 +21,9 @@ if __name__ == '__main__':
     comunity_rating = CommunityRating()
     comunity_rating.analyse_community_rating()
     comunity_rating.visualise_community_results()
+    rating_analysis = RatingAnalysis()
+    rating_analysis.analyse_official_rating()
+    rating_analysis.visiualise_official_results()
 
 
 

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
 class RatingAnalysis:
     def __init__(self):
         print("Test")
@@ -6,7 +7,7 @@ class RatingAnalysis:
 
     def analyse_official_rating(self):
         print("official rating starts")
-        aita_data = ImportData().load_datafile("aita_top_2.json")
+        aita_data = ProcessingBase().load_datafile("DataFiles", "aita_top_8.json")
         nta_count = 0  # not the asshole
         nah_count = 0  # no assholes here
         yta_count = 0  # you're the asshole
@@ -64,6 +65,6 @@ class RatingAnalysis:
         ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-        plt.title('Official rating of posts total')
+        plt.title('Offizielle Bewertung Total')
         plt.show()
 
