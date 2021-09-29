@@ -3,23 +3,27 @@ import matplotlib.pyplot as plt
 import json, os, re
 
 from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
-""" Diese Klasse wertet die Kommentare aus dem AITA-Top Datenset aus und visualisiert die Ergebnisse in einer Pie Chart. """
+
+"""Diese Klasse wertet die Kommentare aus dem AITA-Top Datenset aus und visualisiert die Ergebnisse in einer Pie 
+Chart. """
+
 
 class CommunityRating:
 
     def analyse_community_rating(self):
-        aita_data = ProcessingBase().load_datafile("aita_top_2.json")
+        aita_data = ProcessingBase().load_datafile("DataFiles", "aita_top_8.json")
         # print("aita_data: ", aita_data)
-        # community rating options
+        # Community Bewertung Options
         nta_count = 0  # not the asshole
         nah_count = 0  # no assholes here
         yta_count = 0  # you're the asshole
         esh_count = 0  # everybody sucks here
-        neutral_count = 0  # no rating in comment
+        neutral_count = 0  # Keine explizite Wertung im Kommentar
         total_count_postings = 0
         label = 0
         community_rating = ''
         community_ratings = {}
+
 
         nta_count_total = 0  # not the asshole
         nah_count_total = 0  # no assholes here
@@ -28,42 +32,43 @@ class CommunityRating:
         neutral_count_total = 0  # no rating in comment
         comment_count = 0
 
-        for post in aita_data:
+        for idx, post in enumerate(aita_data):
+            # Überspringe ersten Post, da Moderation Bewertung
             # print("post", post)
             total_count_postings += 1
             comments = post['comment_details']
             if comments != None:
-                for comment in comments:
+                for c_idx, comment in enumerate(comments):
 
-                    # print("comment", comment)
-
+                    #print(c_idx, "comment", comment)
+                ##[Be Civil](https://www.reddit.com/r/AmItheAsshole/about/rules/). \r\n\nPlease review our [FAQ](https://www.reddit.com/r/AmItheAsshole/wiki/faq) for more information.
                     content = comment['content']
                     upvotes = comment['comment_ups']
-                    if upvotes > 500:
+                    author = comment['author']
+                    score = comment['score']
+                    if score > 0 and content != '[deleted]' and content != '[removed]' and author != 'AutoModerator':
 
                         # find char or word in string: https://www.geeksforgeeks.org/python-string-find/
                         # clean up comment_content with regex to remove punctuation and find more variantions of NTA or YTA
                         comment_content_filtered = content.translate(str.maketrans('', '', string.punctuation))
-                        # print("comment_content: ", comment_content_filtered)
+                        comment_content_filtered = comment_content_filtered.lower()
+                        print("comment_content: ", comment_content_filtered)
+
                         # or comment_content_filtered.find("You're the Asshole") or comment_content_filtered.find('Not the Asshole')
-                        if re.match(r'(?:^|\W)YTA(?:$|\W)', comment_content_filtered):
+                        if re.match(r'(?:^|\W)yta(?:$|\W)', comment_content_filtered):
                             yta_count += 1
-                            rating = "YTA - You're the asshole"
-                        # print('Youre the asshole; yta_count: ', yta_count)
-                        elif re.match(r'(?:^|\W)NTA(?:$|\W)', comment_content_filtered):
+
+                        elif re.match(r'(?:^|\W)nta(?:$|\W)', comment_content_filtered):
                             nta_count += 1
-                            rating = "NTA - Not the asshole"
-                            # print("not the asshole; nta_count: ", nta_count)
-                        elif re.match(r'(?:^|\W)ESH(?:$|\W)', comment_content_filtered):
+
+                        elif re.match(r'(?:^|\W)esh(?:$|\W)', comment_content_filtered):
                             esh_count += 1
-                            rating = "ESH - everybody sucks here"
-                        # print("everbody is an asshole; esh_count: ", esh_count)
-                        elif re.match(r'(?:^|\W)NAH(?:$|\W)', comment_content_filtered):
+
+                        elif re.match(r'(?:^|\W)nah(?:$|\W)', comment_content_filtered):
                             nah_count += 1
-                            rating = "NAH - everybody sucks here"
-                        # print("no assholes here; nah_count: ", nah_count)
                         else:
                             neutral_count += 1
+                            #print("This post is neutral", post, comment, neutral_count)
                             #    print('Neutral, neutral_count: ', neutral_count)
                             rating = "Neutral"
                     else:
@@ -94,6 +99,7 @@ class CommunityRating:
                     label = 4
                     neutral_count_total += 1
                     community_rating = 'Neutral'
+                print("official verdict", post['verdict'])
 
                 print("post rating: " + community_rating, str(nta_count), str(yta_count), str(esh_count),
                       str(neutral_count), str(nah_count), str(label))

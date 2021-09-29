@@ -1,13 +1,32 @@
 import self as self
 import torch
-from transformers import pipeline
+#from transformers import pipeline
 
-from Pipeline.QuestionAnswering import TransformerTest
+#from Pipeline.QuestionAnswering import TransformerTest
 from DataScripts.DataCrawling import DataCrawler
+from DataScripts.CrawlingScripts.DataCrawling_Reddit import RedditCrawler
+from DataScripts.AnalysisScripts.CommentAnalysis import CommunityRating
 
 if __name__ == '__main__':
 
+    # Crawling
+    #reddit_crawler = RedditCrawler()
+    #reddit_crawler.crawl_aita_top(reddit_crawler.reddit_authenfication())
+
+
+
+
     print("Hello World")
+    comunity_rating = CommunityRating()
+    comunity_rating.analyse_community_rating()
+    comunity_rating.visualise_community_results()
+
+
+
+
+
+
+
     """
         # call methods from package module - works here and in DataCrawling Script - https://stackoverflow.com/questions/18472904/how-to-use-a-python-function-with-keyword-self-in-arguments
         reddit_datacrawler = DataCrawler()
