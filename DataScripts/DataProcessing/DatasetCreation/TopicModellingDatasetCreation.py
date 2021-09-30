@@ -1,9 +1,10 @@
 import json
-import math
+
 import ntpath
 
 import pandas as pd
 from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
+
 
 class TopicModellingDataset:
 
@@ -46,7 +47,7 @@ class TopicModellingDataset:
                 label = int(3)
             dataset_dataframe = dataset_dataframe.append({
                 "label": label,
-                "text": content
+                "content": content
             }, ignore_index=True)
             label = 0
         print("official Verdicts (Total/NTA/YTA):", total_count_postings, nta_count, yta_count)
@@ -56,7 +57,7 @@ class TopicModellingDataset:
         official_rating['total_esh'] = esh_count
         official_rating['total_nah'] = nah_count
         official_rating['total_neutral'] = neutral_count
-        dataset_dataframe = dataset_dataframe.astype({'label': int, 'text': str})
+        dataset_dataframe = dataset_dataframe.astype({'label': int, 'content': str})
         return dataset_dataframe
 
     def sort_dataframe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -81,6 +82,7 @@ class TopicModellingDataset:
         grouped = sorted_label_df.groupby(sorted_label_df.columns[0])
         group_nta = grouped.get_group(0)
         group_yta = grouped.get_group(1)
+        print("group", group_yta)
 
         print("Anzahl an YTA Datenpunkten:", len(group_yta.index))
         print("Anzahl an NTA Datenpunkten:", len(group_nta.index))
@@ -91,10 +93,13 @@ class TopicModellingDataset:
 
         # Konvertiere in JSON und speicher in Verzeichnis
         nta_data = group_nta.to_json(orient="records")
-        yta_data =  group_yta.to_json(orient="records")
+        nta_data = json.loads(nta_data)
+        yta_data = group_yta.to_json(orient="records")
+        yta_data = json.loads(yta_data)
+
 
         with open(ntpath.join("DataFiles/TopicModellingData", 'tm_nta_data.json'), 'w') as fp:
-            json.dump(nta_data, fp, sort_keys=True, indent=4)
+            json.dump(nta_data, fp, indent=4)
 
         with open(ntpath.join("DataFiles/TopicModellingData", 'tm_yta_data.json'), 'w') as fp:
-            json.dump(yta_data, fp, sort_keys=True, indent=4)
+            json.dump(yta_data, fp, indent=4)
