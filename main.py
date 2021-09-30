@@ -6,6 +6,7 @@ from DataScripts.AnalysisScripts.CommentAnalysis import CommunityRating
 from DataScripts.AnalysisScripts.VerdictAnalysis import RatingAnalysis
 from DataScripts.TopicModellingScripts.TopicModelling import TopicModelling
 from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
+from DataScripts.DataProcessing.DatasetCreation.TopicModellingDatasetCreation import TopicModellingDataset
 
 if __name__ == '__main__':
     # Crawling
@@ -32,6 +33,9 @@ if __name__ == '__main__':
 
     # TopicModelling
     print("=== Topic Modelling Analyse ===")
+    print("Erstelle Datenset für Analyse aus Top")
+    tm_datasetcreation = TopicModellingDataset()
+    tm_datasetcreation.create_datasets(top_data)
     topic_modelling = TopicModelling()
-    topic_modelling.run_topicmodelling(top_data, "Results/TopicModelling/TopicModelling_Total.html")
+    topic_modelling.run_topicmodelling(top_data, "Results/TopicModelling/TopicModelling_Total.html") # Gesamtes Top Datenset
 
