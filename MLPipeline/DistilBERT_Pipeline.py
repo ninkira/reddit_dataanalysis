@@ -4,14 +4,13 @@ import os
 
 import numpy as np
 import pandas as pd
-from datasets import load_dataset, load_metric, metric
-from numpy import exp
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-from torch import nn
+from datasets import load_dataset
+from matplotlib import pyplot as plt
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix, ConfusionMatrixDisplay
+
 from transformers import DistilBertTokenizerFast
 import torch
 from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
-
 from torch.utils.data import DataLoader
 from transformers import DistilBertForSequenceClassification, AdamW
 
@@ -39,16 +38,22 @@ class SequenceClassification():
     DistilBert Pipeline basierend auf dem oben genannten Beispiel zum Trainieren auf dem IMDB Datenset. Hier wird
     die HuggingFace Trainer-Klasse zum Trainieren, Evaluieren und Testen des DistilBert Models verwendet.
     """
-    def load_datasets(self):  # https: // huggingface.co / docs / datasets / loading_datasets.html
+
+    def __init__(self):
+        self.model_name = 'distilbert-base-uncased'
+        self.target_directory_results = "Results/ML_Results/LargeSizedTraining"
+        self.target_directory_models = "Models/Trained/LargeTrainedModel"
+
+    def load_datasets(self):
+        """
+        Lädt die verschiedenen JSON-Datensets als Dataset Objs.
+        :return: trains_ds, test_ds, val_ds -> Dataset Objs
+        """
         dataset = load_dataset("json", data_files={'train': 'DataFiles/DataSets/DataSet-L/dataset_l_train.json',
                                                    'test': 'DataFiles/DataSets/DataSet-L/dataset_l_test.json',
                                                    'validation': 'DataFiles/DataSets/DataSet-L/dataset_l_val.json'},
                                field="data")
-
-        print("dataset info", dataset['train'].info)
-        print("dataset columns", dataset['train'].column_names)
-
-        # get the actual dataset for each part of training and finetuning for later
+        # Aufteilung aus dem dataset Objekt.
         train_ds = dataset['train']
         test_ds = dataset['test']
         val_ds = dataset['validation']
@@ -56,7 +61,13 @@ class SequenceClassification():
         return train_ds, test_ds, val_ds
 
     def split_dataset_attributes(self, train_ds, test_ds, val_ds):
-
+        """
+        Splittet die Datensets in ihre Texte und Labels nach Columns bzw. Spaltennamen.
+        :param train_ds:
+        :param test_ds:
+        :param val_ds:
+        :return:
+        """
         train_texts = train_ds['text']
         train_labels = train_ds['label']
 
@@ -79,11 +90,26 @@ class SequenceClassification():
         :param val_labels:
         :return: Fertige Datensets mithilfe der AITADataset Klasse, welche zum Trainieren des Modells verwendet werden können.
         """
-        tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
+        tokenizer = DistilBertTokenizerFast.from_pretrained(self.model_name)
 
         train_encodings = tokenizer(train_texts, truncation=True, padding=True)
         val_encodings = tokenizer(val_texts, truncation=True, padding=True)
         test_encodings = tokenizer(test_texts, truncation=True, padding=True)
+
+        # Visualisiere Econding Attributes - Hier sieht man sehr gut, dass die Posts durch Truncation und Padding auf die selbe Länge bearbeitet wurden.
+
+        print("=== Tokenized Data ===")
+        print("=> Training_Econding: Num of items", len(train_encodings.encodings))
+        self.count_words(train_texts)
+        self.count_tokens(train_encodings)
+
+        print("=> Test_Econding: Num of items", len(test_encodings.encodings))
+        self.count_words(test_texts)
+        self.count_tokens(test_encodings)
+
+        print("=> Val_Econding: Num of items", len(val_encodings.encodings))
+        self.count_words(val_texts)
+        self.count_tokens(val_encodings)
 
         train_dataset = AITADataset(train_encodings, train_labels)
         val_dataset = AITADataset(val_encodings, val_labels)
@@ -92,17 +118,27 @@ class SequenceClassification():
         return train_dataset, test_dataset, val_dataset,
 
     def load_pretrained_model(self, directory_path):
-
+        """
+        Eigene Methode um das vortrainierte Modell zu laden, hier DistilBERT. Lädt entweder aus lokaler Datei oder von HuggingFace in den Cache.
+        :param directory_path:
+        :return:
+        """
         if os.path.exists(directory_path) == True:
             print("Lade aus lokaler Datei")
             model = DistilBertForSequenceClassification.from_pretrained(directory_path)
         else:
             print("Lade Model von HuggingFace")
-            model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased")
+            model = DistilBertForSequenceClassification.from_pretrained(self.model_name)
             model.save_pretrained(directory_path)
         return model
 
     def train_model(self, model, train_dataset, val_dataset):
+        """
+         Trainingsvorgang des Modells.
+        Für Details zu den Trainingarguments und genauer Funktionsweise des Trainer siehe. https://huggingface.co/transformers/main_classes/trainer.html
+
+        :rtype: object
+        """
         print("=== Training startet ===")
         torch.cuda.empty_cache()
         training_args = TrainingArguments(
@@ -124,19 +160,18 @@ class SequenceClassification():
         )
 
         trainer.train()
-        # TODO: Implement EvaluationSet
-        trainer.save_model(output_dir="Models/Trained/LargeTrainedModel/")
+        trainer.evaluate(eval_dataset=val_dataset)
+        trainer.save_model(output_dir=self.target_directory_models)
         print("=== Training finished ===")
 
 
 
     def predict(self, test_dataset, model):
         """
-        Lässt das Model Vorhersagen machen mithilfe der Trainer.predict()-Methode. Außerdem werden Auswertungsmetriken wie z.B. die Accuracy des
-        Modells berechnet. Die Methode speichert sowohl die Metriken als auch eine Auswertung der Texte mit dem vorhergesagten Label in jeweils eine
-        eigene JSON-Datei.
+        Lässt das Model Vorhersagen machen mithilfe der Trainer.predict()-Methode.
         :param test_dataset: Test-Datenset zudem die vorhersagen gemacht werden.
         :param model: das finegetunte, d.h. trainierte DistilBert-Modell
+        :return predictions: predictions-Objekt des Modells.
         """
         print("=== Starte Prediction ===")
         trainer = Trainer(
@@ -144,9 +179,23 @@ class SequenceClassification():
         )
         predictions = trainer.predict(test_dataset)
 
+        return predictions
+
+    def analyse_predictions(self, predictions, test_dataset):
+        """
+        Analysiere zuvor errechnete Vorhersagen. Besonders interessant: predictions.predictions gibt Vorhersagen inform eines np.arrays
+        für jeden Datenpunkt inform von Logits zurück. Die Logit-Werte werden mit argmax() in absolute Werte (d.h. das Label 0 oder 1)
+        und mit Softmax in die Wahrscheinlichkeiten für jedes Label gewandelt. Zudem wird durch einen Abgleich geschaut, welche Label berechnet wurde.
+
+        Die Ergebnisse werden aus einem Pandas Dateframe inform einer JSON-Datei gespeichert.
+        :param predictions:
+        :param test_dataset:
+        """
         result_frame = pd.DataFrame()
         label = ""
-        tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
+        tokenizer = DistilBertTokenizerFast.from_pretrained(self.model_name)
+
+
         for idx, prediction in enumerate(predictions.predictions):
             og_dataset_item =  test_dataset.__getitem__(idx)
             decoded_text = tokenizer.decode(og_dataset_item['input_ids'])
@@ -181,43 +230,100 @@ class SequenceClassification():
             label = ""
             x = ''
 
-
-        metrics = self.compute_metrics(predictions)
-        # Back-Up: Speicher Metriken in Cache
-        trainer.save_metrics(metrics=metrics, split="all")
-        trainer.save_metrics(metrics=metrics, split="train")
-        trainer.save_metrics(metrics=metrics, split="test")
-        trainer.save_metrics(metrics=metrics, split="eval")
-
         print("=== Speicher Ergebnisse ===")
 
         result = result_frame.to_json(orient="records")
         parsed = json.loads(result)
-        ProcessingBase().save_json_to_file(parsed, "Results/ML_Results/LargeSizedTraining", "LargeSizedPredictions8.json")
+        ProcessingBase().save_json_to_file(parsed, self.target_directory_results, "LargeSizedPredictions.json")
 
-        ProcessingBase().save_json_to_file(metrics, "Results/ML_Results/LargeSizedTraining",
-                                           "LargeSizedMetrics8.json")
 
     def compute_metrics(self, pred):
-        print("pred", pred)
+        """
+        Berechnet die Metriken zu den Predictions bzw. Vorhersagen des finegetunten Models.
+
+        Basierend auf sklearn Metriken:
+        https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html
+        Die Metriken zum Predictions-Vorgang (z.B. Loss) und die Performance-Metriken werden abschließend ebenfalls in JSON-Dateien gespeichert.
+        """
+
         labels = pred.label_ids
         preds = pred.predictions.argmax(-1)
         precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='binary')
         acc = accuracy_score(labels, preds)
+        process_metric = pred.metrics
 
-        return {
-            'accuracy': acc,
-            'f1': f1,
-            'precision': precision,
-            'recall': recall
+        metrics = {
+            'prediction_process_metrics': process_metric,
+            'prediction_result_metrics': {
+                'accuracy': acc,
+                'f1': f1,
+                'precision': precision,
+                'recall': recall
+            }
         }
+
+        ProcessingBase().save_json_to_file(metrics, self.target_directory_results,
+                                           "LargeSizedMetrics.json")
+
+    def count_tokens(self, encoding):
+        """
+        Ermittelt die durschnittliche Länge der encodeten Posts im Datenset. Basierend auf https://www.youtube.com/watch?v=_eSGWNqKeeY&t=1368s (17:30f)
+        :param encoding:
+        """
+        lengths = []
+        token_length = 0
+        for idx, encoded_sent in enumerate(encoding.encodings):
+            tokens = encoding.encodings.__getitem__(idx).tokens
+            token_length = len(tokens)
+            lengths.append(token_length)
+            token_length = 0
+
+        print("Token min length", min(lengths))
+        print("Token max length", max(lengths))
+        print("Token average length", np.median(lengths))
+
+    def confusion_matrix(self, prediction):
+        """
+        Visualisiert die Ergebnisse der Predictions als Confusion Matrix.
+        Basierend auf sklearn: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ConfusionMatrixDisplay.html#sklearn.metrics.ConfusionMatrixDisplay.from_predictions
+
+        :param prediction: Ergebnisse aus trainer.predict()
+        """
+
+        true_labels = prediction.label_ids
+        preds = prediction.predictions.argmax(-1)
+
+        confusion_matrix_base =  confusion_matrix(labels=[0, 1], y_true=true_labels, y_pred=preds)
+
+        disp = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_base)
+        disp.plot()
+        plt.title("Ergebnisse der Vorhersagen für Test-Datenset")
+        plt.show()
+
+    def count_words(self, texts):
+        print("Dataset Anzahl an Texten", len(texts))
+        lengths = []
+        num_words = 0
+
+        for text in texts:
+            num_words = len(text.split())
+            lengths.append(num_words)
+            num_words = 0
+
+        print("Text min length", min(lengths))
+        print("Text max length", max(lengths))
+        print("Text average length", np.median(lengths))
+
+
 
     def run_pipeline(self):
         """
         __main__ methode für dieses Skript. Hier werden alle nötigen Funktionen vom Instanzieren bis zur Auswertung des Models aufgerufen.
         """
-        # create dataset from files - returns train, test, validation split as dictionary
-        model = self.load_pretrained_model("Models/distilbert-base-uncased")
+        # Lade Model
+        model_path = os.path.join("Models", self.model_name)
+        model = self.load_pretrained_model(model_path)
+        # Lade Datensets
         train_ds, test_ds, val_ds = self.load_datasets()
         train_texts, train_labels, test_texts, test_labels, val_texts, val_labels = self.split_dataset_attributes(
             train_ds, test_ds, val_ds)
@@ -225,10 +331,15 @@ class SequenceClassification():
         train_dataset, val_dataset, test_dataset = self.preprocessing(train_texts, train_labels, test_texts,
                                                                       test_labels, val_texts, val_labels)
 
+        # Training bzw. Finetuning des Modells (hier: DistilBERT)
         #self.train_model(model, train_dataset, val_dataset)
 
-        trained_model = DistilBertForSequenceClassification.from_pretrained("Models/Trained/LargeTrainedModel")
+        trained_model = DistilBertForSequenceClassification.from_pretrained(self.target_directory_models)
 
-        self.predict(test_dataset, trained_model)
-        # https://huggingface.co/transformers/usage.html for visualisation / plotting of results
-        # Source https://huggingface.co/transformers/main_classes/trainer.html
+        # Predictions bzw. Vorhersagen des fertig trainierten Models
+        predictions = self.predict(test_dataset, trained_model)
+        # Analyse der Vorgersagen
+        self.analyse_predictions(predictions, test_dataset)
+        self.compute_metrics(predictions)
+        self.confusion_matrix(predictions)
+
