@@ -1,5 +1,3 @@
-
-from DataScripts.DataCrawling import DataCrawler
 from DataScripts.CrawlingScripts.DataCrawling_Reddit import RedditCrawler
 from MLPipeline.DistilBERT_Pipeline import SequenceClassification
 from DataScripts.AnalysisScripts.CommentAnalysis import CommunityRating
@@ -9,6 +7,9 @@ from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
 from DataScripts.DataProcessing.DatasetCreation.TopicModellingDatasetCreation import TopicModellingDataset
 from DataScripts.DataProcessing.DatasetCreation.DataSetCreation import DataSet
 if __name__ == '__main__':
+
+    """Das main.py Skript stellt einige der zentralen Methoden des Packages bereit. Hier werden examplerisch einige 
+    Visualisierung aufgerufen, z.B. die der Verdict- und Kommentar-Analysen. """
     # Crawling
     # reddit_crawler = RedditCrawler()
     # reddit_crawler.crawl_aita_top(reddit_crawler.reddit_authenfication())
@@ -18,7 +19,7 @@ if __name__ == '__main__':
 
     # Display Dataset Features
     processing_base = ProcessingBase()
-    top_data = processing_base.load_datafile_utf8("DataFiles", "aita_top_8.json")
+    top_data = processing_base.load_datafile_utf8("DataFiles", "aita_top_final.json")
     # Anzahl Datenpunkte in JSON
     print("Top Datenset Anzahl der Datenpunkte: ", len(top_data))
 
@@ -29,8 +30,8 @@ if __name__ == '__main__':
 
     # Verdict und Kommentar Untersuchung
     comunity_rating = CommunityRating()
-    #comunity_rating.analyse_community_rating()
-    #comunity_rating.visualise_community_results()
+    comunity_rating.analyse_community_rating()
+    comunity_rating.visualise_community_results()
     rating_analysis = RatingAnalysis()
     #rating_analysis.analyse_official_rating()
     #rating_analysis.visiualise_official_results()
@@ -54,7 +55,6 @@ if __name__ == '__main__':
 
     #print("connect Files")
     #ProcessingBase().connect_files()
-    print("create large datasets")
     data_set = DataSet()
     #dataset_frame = data_set.create_labels()
     #data_set.sort_dataframe(dataset_frame)
