@@ -3,7 +3,6 @@ import nltk
 # Gensim
 import gensim
 import gensim.corpora as corpora
-from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
 
 # spacy
@@ -11,7 +10,6 @@ import spacy
 
 nltk.download('stopwords')
 from nltk.corpus import stopwords
-import en_core_web_sm
 from gensim.models import TfidfModel
 # vis
 import pyLDAvis
@@ -43,7 +41,7 @@ class TopicModelling:
         stop = set(stopwords.words('english'))
         lemmatized_texts = self.lemmatization(data_posts)
         lemmatized_data = list(self.gen_words(lemmatized_texts))
-        print("Lemmetazied Data Example:", lemmatized_data[0])
+        print("Lemmetized Data Example:", lemmatized_data[0])
 
         # bigram and trigams
         bigrams_phrases = gensim.models.Phrases(lemmatized_data, min_count=5, threshold=100)

@@ -3,7 +3,7 @@ import requests.auth
 import json
 import time
 
-from DataScripts.Crawling.DataCrawling_Reddit import RedditCrawler
+from DataScripts.CrawlingScripts.DataCrawling_Reddit import RedditCrawler
 
 
 class CrawlingPushshift:
@@ -37,7 +37,7 @@ class CrawlingPushshift:
             print("crawl_iteration", crawl_iteration)
             print("after_obj", self.after_object)
             if crawl_iteration >= 700:  # CrawlDirectory hat keine Limits hinsichtlich Downloads, daher hier wesentlich höher.
-                print("CrawlDirectory Crawling finished.")
+                print("CrawlDirectory CrawlingScripts finished.")
                 break
             else:
                 if self.after_push_object == '':
@@ -60,7 +60,7 @@ class CrawlingPushshift:
                     filename = "PushshiftCrawling_" + str(crawl_iteration) + ".json"
                     RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/CrawlDirectory", filename)
                     print("Saved ", len(aita_pushshift_df), " items into file", filename)
-                # Konvertiere Dataframe zu JSON zum speichern in Datei, vgl. https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_json.html
+
         result = aita_pushshift_df.to_json(orient="records")
         parsed = json.loads(result)
         RedditCrawler().save_json_to_file(parsed, "DataFiles/CrawlDirectory/CrawlDirectory", "PushshiftCrawling_699.json")
