@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 from DataScripts.DataProcessing.ProcessingBase import ProcessingBase
 class RatingAnalysis:
     def __init__(self):
-        print("Test")
+        print("VerdictAnalysis")
 
 
     def analyse_official_rating(self):
         print("official rating starts")
-        aita_data = ProcessingBase().load_datafile("DataFiles", "aita_top_8.json")
+        aita_data = ProcessingBase().load_datafile("DataFiles", "aita_top_final.json")
         nta_count = 0  # not the asshole
         nah_count = 0  # no assholes here
         yta_count = 0  # you're the asshole

@@ -20,7 +20,7 @@ class CommunityRating:
 
         :rtype: object
         """
-        aita_data = ProcessingBase().load_datafile("DataFiles", "aita_top_8.json")
+        aita_data = ProcessingBase().load_datafile("DataFiles", "aita_top_final.json")
       
         # Community Bewertung Optionen
         nta_count = 0  # not the asshole

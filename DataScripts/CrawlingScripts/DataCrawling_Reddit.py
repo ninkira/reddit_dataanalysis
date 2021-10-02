@@ -88,7 +88,7 @@ class RedditCrawler:
         :param header: Request Header, generiert durch reddit_authenfication(); dieser wird im Verlauf des Crawlings überschrieben.
                         Grund: Bei manchen Verläufen bekommt man sonst einen 401 Error, Access Denied, weil das Token der Anwendung auslöuft.
         :var self.after_object: Flag sicher gestellt wird das auch immer "nach hinten" gecrawlt wird und keine Posts doppelt heruntergeladen werden.
-        :var crawl_iteration: Anzahl der möglichen Crawling-Durchläufe.
+        :var crawl_iteration: Anzahl der möglichen CrawlingScripts-Durchläufe.
         """
 
         aita_top_df = pd.DataFrame()
@@ -126,7 +126,7 @@ class RedditCrawler:
                         result = aita_top_df.to_json(orient="records")
                         parsed = json.loads(result)
                         filename = "Crawling_" + str(crawl_iteration) + ".json"
-                        self.save_json_to_file(parsed, "../../DataFiles/CrawlDirectory", filename)
+                        self.save_json_to_file(parsed, "C:/Users/nceck/Desktop/reddit_dataanalysis/DataFiles/CrawlDirectory/Reddit_Top", filename)
                         print("Saved ", len(aita_top_df), " items into file", filename)
 
                     else:
@@ -148,9 +148,10 @@ class RedditCrawler:
                             aita_top_df = pd.concat([aita_top_df, data_to_append_after], ignore_index=True)
                             print("anzahl zeilen weitere iterationen", len(aita_top_df))
                             result = aita_top_df.to_json(orient="records")
+
                             parsed = json.loads(result)
                             filename = "Crawling_" + str(crawl_iteration) + ".json"
-                            self.save_json_to_file(parsed, "../../DataFiles/CrawlDirectory", filename)
+                            self.save_json_to_file(parsed, "C:/Users/nceck/Desktop/reddit_dataanalysis/DataFiles/CrawlDirectory/Reddit_Top", filename)
                             print("Saved ", len(aita_top_df), " items into file", filename)
                         else:
                             print("Request failed: ", after_request.status_code)
@@ -159,10 +160,9 @@ class RedditCrawler:
                             print("new request headers", request_headers)
                     else:
                         continue
-                # convert to json to save in file - https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_json.html
         result = aita_top_df.to_json(orient="records")
         parsed = json.loads(result)
-        self.save_json_to_file(parsed, "DataFiles/BaseData", "BaseDataFinal_2.json")
+        self.save_json_to_file(parsed, "DataFiles", "aita_top.json")
 
     def aita_dataframe(self, request_json, headers) -> pd.DataFrame:
         """
@@ -184,7 +184,7 @@ class RedditCrawler:
 
 
         author_details = {}
-        for i, post in enumerate(aita_json_list, start=28742):
+        for i, post in enumerate(aita_json_list):
             print("index post: ", i)
             post_author = post['data']['author']
             time.sleep(1)
