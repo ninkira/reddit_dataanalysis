@@ -218,13 +218,14 @@ class SequenceClassification():
             else:
                 label = "Label 1 - YTA"
 
+
             result_frame = result_frame.append({
                 'Original_Text': decoded_text,
                 'Original_Label': str(og_label),
                 'Prediction': str(prediction),
                 'Predicted_Label_Argmax': str(np.argmax(prediction)),
-                'Predicted_Label_Softmax':str(probabilities) + " Summe: " + str(sum(probabilities)),
-                'Predicted_Label_Softmax_Converted': str(converted_probabilities) + " Summe: " + str(sum(converted_probabilities)),
+                'Predicted_Label_Softmax':str(round(float(probabilities.data[0]), 2)) + " (NTA), "+  str(round(float(probabilities.data[1]), 2)) + " (YTA) "  + " - Summe: " + str(int(sum(probabilities))),
+                'Predicted_Label_Softmax_Converted': str(round(float(converted_probabilities.data[0]), 2)) + " (NTA), " + str(round(float(converted_probabilities.data[1]), 2))+  " (YTA) " + " - Summe: " + str(round(float(sum(converted_probabilities)))),
                 'Predicted_Label': label,
                 }, ignore_index=True)
             label = ""
