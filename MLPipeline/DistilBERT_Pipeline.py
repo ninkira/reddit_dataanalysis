@@ -37,6 +37,7 @@ class SequenceClassification():
     """
     DistilBert Pipeline basierend auf dem oben genannten Beispiel zum Trainieren auf dem IMDB Datenset. Hier wird
     die HuggingFace Trainer-Klasse zum Trainieren, Evaluieren und Testen des DistilBert Models verwendet.
+    Für die Modelle siehe https://drive.google.com/file/d/1nQ8-JDfpFmLLVc7lqRmRdnvYZ--H3hpO/view?usp=sharing - einfach herunterladen und in Projekt Struktur einfügen.
     """
 
     def __init__(self):
