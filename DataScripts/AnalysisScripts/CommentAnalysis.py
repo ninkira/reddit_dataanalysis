@@ -71,7 +71,8 @@ class CommunityRating:
                         elif re.match(r'(?:^|\W)INFO(?:$|\W)', comment_content_filtered):
                             info_count += score
                         else:
-                            neutral_count += score
+                            neutral_count += score # Auskommentieren falls neutrale Kommentare gar nicht gewertet werden sollen sollen
+                            # neutral_count += 1 Falls Kommentare nur mit Faktor 1 gewertet werden sollen.
                     else:
                         continue
 
