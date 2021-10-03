@@ -89,6 +89,7 @@ class RedditCrawler:
                         Grund: Bei manchen Verläufen bekommt man sonst einen 401 Error, Access Denied, weil das Token der Anwendung auslöuft.
         :var self.after_object: Flag sicher gestellt wird das auch immer "nach hinten" gecrawlt wird und keine Posts doppelt heruntergeladen werden.
         :var crawl_iteration: Anzahl der möglichen CrawlingScripts-Durchläufe.
+
         """
 
         aita_top_df = pd.DataFrame()
@@ -167,7 +168,7 @@ class RedditCrawler:
     def aita_dataframe(self, request_json, headers) -> pd.DataFrame:
         """
         Verarbeitet die Request-Antworten aus aita_top() und aita_hot(). Die Request-Responses werden mit einem Pandas-Dataframe
-        sortiert und dann in ein JSON-Format umgewandelt und gespeichert. Dies basiert auf diesem Tutorial: https://www.youtube.com/watch?v=FdjVoOf9HN4&t=1046s
+        sortiert und dann in ein JSON-Format umgewandelt und gespeichert. Dies basiert auf diesem Tutorial: https://www.youtube.com/watch?v=FdjVoOf9HN4
 
         :param request_json: Request-Response
         :param headers: Initialer
