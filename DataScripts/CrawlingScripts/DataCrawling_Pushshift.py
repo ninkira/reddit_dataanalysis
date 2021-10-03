@@ -12,7 +12,6 @@ class CrawlingPushshift:
     herunterzuladen. Er basiert im wesentlichen auf den den Reddit-API Crawler. Auch hier sind noch Print Statements
     im Code um den zustand des Crawlers zu überprüfen. Skript ist außerdem angelehnt an.
     Author- und Kommentar-Daten werden hier bewusst aus Speicherplatz Gründen ausgelassen.
-    https://medium.com/@pasdan/how-to-scrap-reddit-using-pushshift-io-via-python-a3ebcc9b83f4
     """
 
     def __init__(self):
@@ -136,6 +135,7 @@ class CrawlingPushshift:
         Response in JSON um und sortiert die Daten mithilfe eines Pandas Dataframes. :param request_url: Request URL,
         anhand denen die Daten von CrawlDirectory heruntergeladen werden sollen. :return: Pandas Dataframe mit den
         sortierten Daten.
+        Quelle für Architektur dieser Methode: https://www.youtube.com/watch?v=FdjVoOf9HN4 (Wie in DataCrawling_Reddit.py)
         """
         dataframe = pd.DataFrame()
         request = requests.get(request_url)
