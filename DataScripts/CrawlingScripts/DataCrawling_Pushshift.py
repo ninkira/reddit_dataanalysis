@@ -23,6 +23,7 @@ class CrawlingPushshift:
         """
         Hauptmethode um Daten von CrawlDirectory zu crawlen.
         Quelle für die Request-URLs: https://medium.com/swlh/how-to-scrape-large-amounts-of-reddit-data-using-pushshift-1d33bde9286
+        Quelle für den Basis-Aufbau: https://github.com/iterative/aita_dataset/blob/master/0_push_api.py
         """
 
         aita_pushshift_df = pd.DataFrame()
