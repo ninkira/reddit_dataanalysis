@@ -57,7 +57,8 @@ class RedditCrawler:
     def crawl_aita_hot(self, header, filename):
         """
         Crawlt Posts aus der Kategorie "Hot" des AITA-Subreddits. Die Request-Antwort enthält somit die aktuell 10 beliebsten Posts aus AITA.
-        :param header:
+        Quelle für den Basis-Aufbau: https://github.com/iterative/aita_dataset/blob/master/0_push_api.py
+        :param header: Request Header
         """
         aita_hot_df = pd.DataFrame()
         crawl_iteration = 0
@@ -85,6 +86,7 @@ class RedditCrawler:
         """
         Crawlt Posts aus der Top-Kategorie von AITA. Die Funktion macht einen Reuqest an die Reddit-API und bekommt pro Request rund 100 Postings. Die While-Schleife läuft bis keine Postings mehr gecrawlt werden können,
         nach jeder Iteration werden die gecrawlten Posts zwischengespeichert. Die Verarbeitung der Responses erfolgt in aita_dataframe().
+        Quelle für den Basis-Aufbau: https://github.com/iterative/aita_dataset/blob/master/0_push_api.py
         :param header: Request Header, generiert durch reddit_authenfication(); dieser wird im Verlauf des Crawlings überschrieben.
                         Grund: Bei manchen Verläufen bekommt man sonst einen 401 Error, Access Denied, weil das Token der Anwendung auslöuft.
         :var self.after_object: Flag sicher gestellt wird das auch immer "nach hinten" gecrawlt wird und keine Posts doppelt heruntergeladen werden.
@@ -110,9 +112,6 @@ class RedditCrawler:
                 if self.after_object == '':
                     print("Reddit Crawler - first crawling object")
 
-                    # Quellen für URL:
-                    # https://www.reddit.com/r/redditdev/comments/6anc5z/what_on_earth_is_the_url_to_get_a_simple_json/
-                    # https://www.reddit.com/dev/api#listings - for url parameter
                     aita_top_url_base = "https://oauth.reddit.com/r/AmItheAsshole?limit=100"
                     request = requests.get(aita_top_url_base,
                                            headers=request_headers)
@@ -127,7 +126,7 @@ class RedditCrawler:
                         result = aita_top_df.to_json(orient="records")
                         parsed = json.loads(result)
                         filename = "Crawling_" + str(crawl_iteration) + ".json"
-                        self.save_json_to_file(parsed, "C:/Users/nceck/Desktop/reddit_dataanalysis/DataFiles/CrawlDirectory/Reddit_Top", filename)
+                        self.save_json_to_file(parsed, "DataFiles/CrawlDirectory/Reddit_Top", filename)
                         print("Saved ", len(aita_top_df), " items into file", filename)
 
                     else:
